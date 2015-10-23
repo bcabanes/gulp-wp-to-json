@@ -25,6 +25,7 @@
   "dependencies": {
     "bluebird": "^2.10.2",
     "chalk": "^1.1.1",
-    "lodash": "^3.10.1"
+    "lodash": "^3.10.1",
+    "request-promise": "^1.0.2"
   }
 }
