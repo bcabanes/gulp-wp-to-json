@@ -2,7 +2,9 @@
 Simple nodeJS script to transform you WordPress API into a single JSON file.
 
 ## Installation
+```bash
 npm install --save wp-to-json
+```
 
 ### Usage
 `wpToJson` is a simple WordPress api caller to save data in JSON file. It will basically call the `/option` route to know all pages that should be retrieved. Then, it will performs a call on each post to gather data.
