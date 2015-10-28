@@ -1,6 +1,6 @@
 {
   "name": "wp-to-json",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Simple nodeJS script to transform you WordPress API into a single JSON file.",
   "main": "index.js",
   "scripts": {
