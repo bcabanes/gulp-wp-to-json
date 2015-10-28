@@ -38,7 +38,7 @@ wpService.prototype.getPagesIndex = function() {
     .then(function(pages) {
       var index = [];
       for (var page in pages) {
-        if (pages.hasOwnProperty(page) && pages[page].hasOwnProperty('ID')) {
+        if (pages.hasOwnProperty(page) && pages[page] !== null  pages[page].hasOwnProperty('ID')) {
           index.push({
             id : pages[page]['ID'],
             name: page
