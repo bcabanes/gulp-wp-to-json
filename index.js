@@ -25,10 +25,17 @@ function wpToJson(options) {
   return options.reduce(function(promise, params) {
       return promise.then(function() {
         var wp = new wpService(params.url, params.locale);
-        return wp.getPagesIndex()
-          .then(function(pagesIndex) {
-            wp.pagesIndex = pagesIndex;
-            return wp.populatePages();
+        return wp.getMenusIndex()
+          .then(function(menusIndex) {
+            wp.menusIndex = menusIndex;
+            return wp.populateMenus();
+          })
+          .then(function() {
+            return wp.getPagesIndex()
+              .then(function(pagesIndex) {
+                wp.pagesIndex = pagesIndex;
+                return wp.populatePages();
+              });
           })
           .then(function() {
             var dest = params.dest || './dest';

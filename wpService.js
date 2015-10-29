@@ -15,6 +15,9 @@ function wpService(url, locale) {
   this.contentFile = {};
   this.locale = locale || 'en-US';
   this.pagesIndex = [];
+  this.menusIndex = [];
+  this.menus = {};
+  this.options = {};
   this.pages = {};
   this.wpIndex = {};
 }
@@ -24,21 +27,52 @@ wpService.prototype.getContentFile = function() {
   // Make a copy of the wpIndex content.
   _.extend(this.contentFile, this.wpIndex);
 
+  this.contentFile.pages = {};
   for (var page in this.pages) {
-    if (this.pages.hasOwnProperty(page)) {
-      this.contentFile[page] = this.pages[page];
-    }
+    delete this.contentFile[page];
   }
-  return this.contentFile;
+  this.contentFile.pages = this.pages;
+
+  this.contentFile.menus = {};
+  for (var menu in this.menus) {
+    delete this.contentFile[menu];
+  }
+  this.contentFile.menus = this.menus;
+
+  this.contentFile.options = {};
+  this.options = this.extractOptions(this.contentFile);
+  for (var option in this.options) {
+    delete this.contentFile[option];
+  }
+  this.contentFile.options = this.options;
+
+  return [this.contentFile];
+};
+
+wpService.prototype.getMenusIndex = function() {
+  this.notify('Construct menus index...', 'yellow');
+  return this.requestUrl('menus')
+    .then(function(menus) {
+      var index = [];
+      for (var menu in menus) {
+        if (menus.hasOwnProperty(menu) && menus[menu].hasOwnProperty('ID')) {
+          index.push({
+            id : menus[menu]['ID'],
+            name: menus[menu]['slug']
+          });
+        }
+      }
+      return index;
+    });
 };
 
 wpService.prototype.getPagesIndex = function() {
-  this.notify('Construct page index...', 'yellow');
+  this.notify('Construct pages index...', 'yellow');
   return this.getWpIndex()
     .then(function(pages) {
       var index = [];
       for (var page in pages) {
-        if (pages.hasOwnProperty(page) && pages[page] !== null  pages[page].hasOwnProperty('ID')) {
+        if (pages.hasOwnProperty(page) && pages[page].hasOwnProperty('ID')) {
           index.push({
             id : pages[page]['ID'],
             name: page
@@ -66,6 +100,15 @@ wpService.prototype.notify = function(message, color) {
   return console.log(chalk[color].call(this, message));
 };
 
+wpService.prototype.populateMenus = function() {
+  var self = this;
+  return this.menusIndex.reduce(function(promise, menu, index) {
+      return promise.then(function() {
+        return Promise.resolve(self.setMenu(menu.name, menu.id));
+      });
+    }, Promise.resolve());
+};
+
 wpService.prototype.populatePages = function() {
   var self = this;
   return this.pagesIndex.reduce(function(promise, page, index) {
@@ -85,6 +128,25 @@ wpService.prototype.requestUrl = function(param) {
     json: true // Automatically parses the JSON string in the response
   };
   return request(options);
+};
+
+wpService.prototype.extractOptions = function(content) {
+  var options = {};
+  // Make a copy of the content before sanitizing.
+  _.extend(options, content);
+  delete options.pages;
+  delete options.menus;
+
+  return options;
+};
+
+wpService.prototype.setMenu = function(name, id) {
+  var self = this;
+  this.notify('Set data for: ' + name);
+  return this.requestUrl('menus/'.concat(id))
+    .then(function(data) {
+      self.menus[name] = data;
+    });
 };
 
 wpService.prototype.setPage = function(name, id) {
